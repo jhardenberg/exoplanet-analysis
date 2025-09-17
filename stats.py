@@ -3,13 +3,13 @@ from util import fldmean
 import pandas as pd
 import yaml
 
-def compute_stats(exp_name, exp_file):
+def compute_stats(exp_name, exp_file, flux=None):
 
     stats = {}
     for i, exp in enumerate(exp_name):
             data = xr.open_mfdataset(exp_file[i])
             data = data.isel(time=slice(-12, None)).mean(dim='time')
-            print(exp,':')
+            print(i, exp,':')
 
             stats[exp] = {}
 
@@ -57,6 +57,14 @@ def compute_stats(exp_name, exp_file):
             deltatas = float((data.tas.sel(lat=0, lon=0, method='nearest') - data.tas.sel(lat=0, lon=180, method='nearest')).values)
             stats[exp]['deltatas'] = deltatas
             print(f"   deltatas: {deltatas}")
+
+            prw = float(fldmean(data.prw).values)
+            stats[exp]['prw'] = prw
+            print(f"   prw: {prw}")
+
+            if flux:
+                stats[exp]['flux'] = flux[i]
+                print(f"   flux: {flux[i]}")
     return stats
 
 def save_stats(stats, basename='stats', fmt='csv'):

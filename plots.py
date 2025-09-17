@@ -10,7 +10,8 @@ from util import dv2uv, sp2gp
 def plotmap(da, fig=None, subplot=(1, 1, 1), title=None, extent=None, 
             coast=True, proj="lonlat", cmap="viridis", cline=None,
             clabel="off", grid=[30,30], national=False, cdir="vertical", 
-            figsize=(12, 8), add_colorbar=True, terminator=False, ice=None, **kwargs):
+            figsize=(12, 8), add_colorbar=True, terminator=False, ice=None, 
+             loglevel='info', **kwargs):
     """
     Plot a map using cartopy and xarray.
     
@@ -52,6 +53,8 @@ def plotmap(da, fig=None, subplot=(1, 1, 1), title=None, extent=None,
         Add colorbar to the plot.
     ice : xarray.DataArray, optional
         Ice data to plot. If None, no ice data is plotted.
+    loglevel : str, optional
+        Logging level. Options are 'debug', 'info', 'warning', 'error', 'critical'.
     **kwargs : optional 
         Additional arguments to pass to the xarray plot function.
 
@@ -105,6 +108,9 @@ def plotmap(da, fig=None, subplot=(1, 1, 1), title=None, extent=None,
 
     if 'nsp' in da.dims:
         da = sp2gp(da)
+
+    if loglevel.lower() == 'debug':
+        print(f"Minimum: {da.min().values} Maximum: {da.max().values}")
     
     if clabel == "off":
         units = da.attrs.get('units', None)
@@ -334,7 +340,7 @@ def plotmap_quiver(duv, fig=None, subplot=(1, 1, 1), title=None, extent=None,
 
 def make_stamps(exp_file, exp_name, var='tas', label=None, cline=None, level=None,
                 cmin=160, cmax=380, outfile=None, cmap='jet', factor=1, 
-                subplot=(5, 5), figsize=(12, 8), terminator=False, ice=False):
+                subplot=(5, 5), figsize=(12, 8), terminator=False, ice=False, loglevel='info'):
     """
     Make a set of stamps for a given variable and experiments.
     
@@ -401,10 +407,10 @@ def make_stamps(exp_file, exp_name, var='tas', label=None, cline=None, level=Non
             iceda = data['sic']
         else:
             iceda = None
-             
+
         im = plotmap(da, fig=fig, subplot=(subplot[0], subplot[1], i+1), proj="robinson", 
                 coast=False, vmin=cmin, vmax=cmax, clabel=var, cmap=cmap, terminator=terminator,
-                title=exp, cdir='vertical', add_colorbar=False, cline=cline, ice=iceda)
+                title=exp, cdir='vertical', add_colorbar=False, cline=cline, ice=iceda, loglevel=loglevel)
 
     cbar_ax = fig.add_axes([0.92, 0.25, 0.015, 0.5])
     fig.colorbar(im, cax=cbar_ax, label=label, orientation='vertical')
