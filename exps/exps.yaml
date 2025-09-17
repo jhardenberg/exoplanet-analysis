@@ -1,0 +1,46 @@
+experiments:
+  TeegardenStarb-noPR-JC:
+    name: Teegarden's Star b
+  TOI700d-noPR-JC:
+    name: TOI-700 d
+  Kepler1649c-noPR-JC:
+    name: Kepler-1649 c
+  TOI700e-noPR-JC:
+    name: TOI-700 e
+  TRAPPIST1d-noPR-JC:
+    name: TRAPPIST-1 d
+  K272e-noPR-JC:
+    name: K2-72 e
+  ProximaCenb-noPR-JC:
+    name: Proxima Cen b
+  GJ1002b-noPR-JC:
+    name: GJ 1002 b
+  GJ1061d-noPR-JC:
+    name: GJ 1061 d
+  GJ1061c-noPR-JC:
+    name: GJ 1061 c
+  Ross128b-noPR-JC:
+    name: Ross 128 b
+  GJ273b-noPR-JC:
+    name: GJ 273 b
+  Kepler296e-noPR-JC:
+    name: Kepler-296 e
+  Wolf1069b-noPR-JC:
+    name: Wolf 1069 b
+  TRAPPIST1e-noPR-JC:
+    name: TRAPPIST-1 e
+  Kepler1652b-noPR-JC:
+    name: Kepler-1652 b
+  K23d-noPR-JC:
+    name: K2-3 d
+  TOI715b-noPR-JC:
+    name: TOI-715 b
+  TRAPPIST1f-noPR-JC:
+    name: TRAPPIST-1 f
+  TeegardenStarc-noPR-JC:
+    name: Teegarden's Star c
+  Kepler1229b-noPR-JC:
+    name: Kepler-1229 b
+  TRAPPIST1g-noPR-JC:
+    name: TRAPPIST-1 g
+
