@@ -4,13 +4,13 @@ import pandas as pd
 import numpy as np
 import yaml
 
-def compute_stats(exp_name, exp_file, flux=None):
+def compute_stats(exp_name, exp_file, experiments, flux=None):
 
     stats = {}
     for i, exp in enumerate(exp_name):
             data = xr.open_mfdataset(exp_file[i])
             data = data.isel(time=slice(-12, None)).mean(dim='time')
-            print(i, exp,':')
+                
 
             stats[exp] = {}
 
@@ -94,22 +94,65 @@ def save_stats(stats, basename='stats', fmt='csv'):
         return stats_df
 
 
+def compute_planetary_stats(experiments):
 
-def compute_planetary_stats(exp_name, exp_file, flux=None):
-
+    exp_dir = experiments.get('path','.')
+    
     stats = {}
-    for i, exp in enumerate(exp_name):
-            data = xr.open_mfdataset(exp_file[i]).isel(time=slice(-12, None))
+    for i, exp in enumerate(experiments['experiments']):
+
+            exp_file = os.path.join(exp_dir, exp, "output", "MOST_PLA*.nc")   
+            exp_name = experiments['experiments'][exp]['name']                      
+
+            data = xr.open_mfdataset(exp_file).isel(time=slice(-12, None))
+            data = data.drop_vars('time_bnds', errors='ignore')
+            
             datau = dv2uv(data)
-            datau = datau.mean(dim='time')
+            datau = datau.mean(dim='time').where((datau.lon >= 270) | (datau.lon <= 90))        
             data = data.mean(dim='time')
+
+            stats[exp] = {}
+
+            print(i, exp,':')
 
             tas = float(fldmean(data.tas).values)
             stats[exp]['tas'] = tas
-            print(f"   tas: {tas}")
+            print(f"  tas: {tas}")
 
-            uscale =  np.sqrt(float(fldmean(data.u**2 + data.v**2)))
+            uscale =  np.sqrt(fldmean(datau.u**2 + datau.v**2).values)[-1] # lower level winds
             stats[exp]['uscale'] = uscale
             print(f"  uscale: {uscale}")
+
+            # compute atmospheric scale height
+
+            radius = experiments['experiments'][exp].get('radius', 1)*6371*1000
+            g = experiments['experiments'][exp].get('gravity', 9.81)
+            period = experiments['experiments'][exp].get('period', 1) * 86400
+
+            stats[exp]['radius'] = radius
+            stats[exp]['g'] = g
+            stats[exp]['period'] = period
+            print(f"  radius / radius_earth: {radius/(6371*1000)}")
+            print(f"  g: {g}    ")
+            print(f"  period / period_earth: {period/86400}")
+
+            R = 8.314 # universal gas constant
+            mair = 28.9644 / 1000 # molar mass of air in Kg/mole
+            scaleheight = tas * R / g / mair
+            stats[exp]['scaleheight'] = scaleheight
+            print(f"  scale height: {scaleheight}")
+
+            omega = 2 * np.pi / period # rotation rate of Earth
+            # lambdar = np.sqrt(g * scaleheight) / (4 * omega)  # Rossby radius
+
+            lambdar =  np.sqrt(( np.sqrt(g * scaleheight) / (4 * omega) ) * radius )  # Rossby radius
+
+            stats[exp]['lambdara'] = lambdar / radius
+            print(f"  lambda_r / a: {lambdar / radius}")
+            print(f"  lambda_r: {lambdar}")
+
+            rhines = np.pi * np.sqrt( uscale * radius / (2 * omega))
+            stats[exp]['rhines'] = rhines
+            print(f"  rhines / a: {rhines / radius}")
 
     return stats
