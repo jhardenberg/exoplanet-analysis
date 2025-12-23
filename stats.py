@@ -1,6 +1,7 @@
 import xarray as xr
-from util import fldmean
+from util import fldmean, dv2uv
 import pandas as pd
+import numpy as np
 import yaml
 
 def compute_stats(exp_name, exp_file, flux=None):
@@ -91,3 +92,24 @@ def save_stats(stats, basename='stats', fmt='csv'):
         
         print(f"Statistics saved to {basename}.yaml and {basename}.{fmt}")
         return stats_df
+
+
+
+def compute_planetary_stats(exp_name, exp_file, flux=None):
+
+    stats = {}
+    for i, exp in enumerate(exp_name):
+            data = xr.open_mfdataset(exp_file[i]).isel(time=slice(-12, None))
+            datau = dv2uv(data)
+            datau = datau.mean(dim='time')
+            data = data.mean(dim='time')
+
+            tas = float(fldmean(data.tas).values)
+            stats[exp]['tas'] = tas
+            print(f"   tas: {tas}")
+
+            uscale =  np.sqrt(float(fldmean(data.u**2 + data.v**2)))
+            stats[exp]['uscale'] = uscale
+            print(f"  uscale: {uscale}")
+
+    return stats
